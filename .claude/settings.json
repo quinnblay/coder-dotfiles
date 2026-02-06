@@ -1,0 +1,129 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "cleanupPeriodDays": 99999,
+  "attribution": {
+    "commit": "🤖 Generated with [Claude Code](https://claude.com/claude-code)",
+    "pr": "🤖 Generated with [Claude Code](https://claude.com/claude-code)"
+  },
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+  },
+  "permissions": {
+    "allow": [
+      "Bash(docker logs:*)",
+      "WebFetch(domain:docs.checkbook.io)",
+      "Bash(docker compose exec:*)",
+      "Bash(claude mcp list:*)",
+      "mcp__bigquery__search_catalog",
+      "mcp__bigquery__get_table_info",
+      "WebFetch(domain:www.theclearinghouse.org)",
+      "Bash(docker compose:*)",
+      "Bash(make packs-update:*)",
+      "Bash(npx rubocop:*)",
+      "Bash(make rubocop-fix:*)",
+      "Bash(bq show:*)",
+      "mcp__bigquery__list_table_ids",
+      "mcp__bigquery__list_dataset_ids",
+      "mcp__linear__get_issue",
+      "mcp__linear__list_issues",
+      "mcp__linear__list_projects",
+      "WebFetch(domain:demo.mobiledeposit.com)",
+      "Bash(ffmpeg:*)",
+      "mcp__notion__notion-search",
+      "mcp__notion__notion-fetch",
+      "mcp__linear__update_issue",
+      "WebFetch(domain:ai.google.dev)",
+      "WebFetch(domain:discuss.ai.google.dev)",
+      "Bash(xargs ls:*)",
+      "WebFetch(domain:mitek-systems.github.io)",
+      "WebFetch(domain:docs.statsig.com)",
+      "mcp__statsig-local__Get_List_of_Gates",
+      "WebFetch(domain:medium.com)",
+      "Bash(ruby-lsp:*)",
+      "WebFetch(domain:support.claude.com)",
+      "WebFetch(domain:zed.dev)",
+      "WebFetch(domain:docs.sentry.io)",
+      "WebFetch(domain:gitlab.com)",
+      "Bash(grep:*)",
+      "Bash(find:*)"
+    ],
+    "deny": [
+      "Bash(make prod-rc)",
+      "Bash(make prod-console)",
+      "Bash(make stage-rc)",
+      "Bash(make stage-console)",
+      "Bash(git add -A)",
+      "Bash(git add .)",
+      "Bash(git add --all)",
+      "Bash(git add -A .)",
+      "Bash(git add . -A)",
+      "Bash(git add --all .)",
+      "Bash(git add . --all)",
+      "mcp__bigquery__execute_sql"
+    ],
+    "ask": [],
+    "defaultMode": "default",
+    "additionalDirectories": ["~/scratch"]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ~/.claude/hooks/git-to-graphite-interceptor.py",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  },
+  "enabledPlugins": {
+    "feature-dev@claude-code-plugins": true,
+    "code-documentation@claude-code-workflows": true,
+    "debugging-toolkit@claude-code-workflows": true,
+    "code-simplifier@claude-plugins-official": true
+  },
+  "alwaysThinkingEnabled": true,
+  "allowedTools": [
+    "Bash(npm run lint:*)",
+    "Bash(grep:*)",
+    "Bash(head:*)",
+    "Bash(tail:*)",
+    "Bash(cat:*)",
+    "Bash(ls:*)",
+    "Bash(find:*)",
+    "Bash(fd:*)",
+    "Bash(sed:*)",
+    "Bash(xargs:*)",
+    "Bash(test:*)",
+    "Bash(git log:*)",
+    "Bash(git diff:*)",
+    "Bash(git status:*)",
+    "Bash(git branch:*)",
+    "Bash(gh pr view:*)",
+    "Bash(gh pr diff:*)",
+    "Bash(gh pr list:*)",
+    "Bash(gh run view:*)",
+    "Bash(yarn:*)",
+    "Bash(yarn list:*)",
+    "Bash(npm ls:*)",
+    "Bash(npx jest:*)",
+    "Bash(npx tsc:*)",
+    "Bash(npx eslint:*)",
+    "Bash(bundle list:*)",
+    "Bash(gem list:*)",
+    "Bash(rbenv version:*)",
+    "Bash(pyenv versions:*)",
+    "Bash(node --version:*)",
+    "WebSearch",
+    "WebFetch(domain:github.com)",
+    "WebFetch(domain:stackoverflow.com)",
+    "WebFetch(domain:docs.rs)",
+    "WebFetch(domain:rspec.info)",
+    "WebFetch(domain:www.rubydoc.info)",
+    "WebFetch(domain:relishapp.com)",
+    "WebFetch(domain:rspec.rubystyle.guide)"
+  ]
+}

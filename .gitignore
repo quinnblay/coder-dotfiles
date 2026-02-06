@@ -1,0 +1,3 @@
+# Never commit actual secrets
+.env.claude
+*.env
