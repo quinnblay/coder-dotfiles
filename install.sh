@@ -106,12 +106,21 @@ echo "  Symlinked CLAUDE.md, settings.json, and hooks"
 # ------------------------------------------------------------------
 echo "[5/6] Configuring MCP servers..."
 
-# Source secrets file if it exists
-if [ -f "$HOME/.env.claude" ]; then
+# Load secrets: prefer GCP Secret Manager, fall back to local file
+if command -v gcloud &>/dev/null && gcloud secrets versions access latest --secret=coder_quinn_secrets > /tmp/.env.claude 2>/dev/null; then
+  echo "  Loading secrets from GCP Secret Manager (coder_quinn_secrets)..."
+  set -a
+  source /tmp/.env.claude
+  set +a
+  rm -f /tmp/.env.claude
+elif [ -f "$HOME/.env.claude" ]; then
   echo "  Loading secrets from ~/.env.claude"
   set -a
   source "$HOME/.env.claude"
   set +a
+else
+  echo "  No secrets source found. MCP servers requiring API keys will not work."
+  echo "  Ask SRE to grant your pod access to coder_quinn_secrets, or create ~/.env.claude manually."
 fi
 
 # Build the MCP servers JSON.
@@ -187,7 +196,8 @@ echo ""
 
 if [ -z "${CONTEXT7_API_KEY:-}" ] || [ -z "${FIGMA_API_KEY:-}" ]; then
   echo "2. SET UP API KEYS:"
-  echo "   Create ~/.env.claude with your secrets, then re-run this script:"
+  echo "   Preferred: Ask SRE to grant your pod access to the coder_quinn_secrets GCP secret."
+  echo "   Fallback:  Create ~/.env.claude with your secrets, then re-run this script:"
   echo ""
   echo "     cp $DOTFILES_DIR/env.claude.example ~/.env.claude"
   echo "     vim ~/.env.claude    # Fill in your keys"

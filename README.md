@@ -13,7 +13,9 @@ git clone git@github.com:<you>/dotfiles.git ~/dotfiles
 # 2. Run the installer
 bash ~/dotfiles/install.sh
 
-# 3. Set up API keys for MCP servers that need them
+# 3. API keys are loaded automatically from GCP Secret Manager
+#    (ask SRE for access to coder_quinn_secrets)
+#    Or, for local dev, use the fallback:
 cp ~/dotfiles/env.claude.example ~/.env.claude
 vim ~/.env.claude    # Fill in your keys
 bash ~/dotfiles/install.sh   # Re-run to apply keys
@@ -76,7 +78,8 @@ The `.claude/` directory mirrors `~/.claude/` in your home directory (standard d
 | `.claude/settings.json` | `~/.claude/settings.json` | Permissions, hooks, plugins, allowed/denied tools |
 | `.claude/hooks/*.py` | `~/.claude/hooks/*.py` | Pre-tool-use hooks that intercept commands |
 | Generated at install | `~/.claude.json` | User-level MCP server configuration (merged, not symlinked) |
-| `~/.env.claude` (manual) | Read by `install.sh` | API keys for MCP servers (never committed) |
+| GCP `coder_quinn_secrets` | Read by `install.sh` | API keys for MCP servers (primary, fetched at install time) |
+| `~/.env.claude` (manual) | Read by `install.sh` | API keys for MCP servers (fallback, never committed) |
 
 Config files are symlinked so you can edit `~/.claude/settings.json` in a workspace and the change is reflected in the dotfiles repo (and vice versa). `~/.claude.json` is the exception — Claude Code constantly writes state into it, so the installer merges MCP servers into it rather than symlinking.
 
@@ -131,15 +134,34 @@ Graphite auth is separate from Claude. Run once per workspace:
 gt auth
 ```
 
-## API Keys
+## Secrets
 
-Create `~/.env.claude` from the template (this file is gitignored):
+API keys for MCP servers are loaded automatically by `install.sh`. There are two sources, tried in order:
+
+### 1. GCP Secret Manager (preferred for Coder workspaces)
+
+The installer fetches the `coder_quinn_secrets` secret from GCP Secret Manager. This works automatically once SRE has granted the pod's Google Service Account read access to the secret.
+
+The secret value is the contents of an `.env.claude` file (key=value pairs). Secrets are fetched to a temp file, sourced into the installer process, and immediately deleted — they never persist on disk.
+
+**Uploading or updating the secret:**
+
+```bash
+# From a machine with gcloud auth and Secret Manager access
+gcloud secrets versions add coder_quinn_secrets --data-file=~/.env.claude
+```
+
+### 2. Local `~/.env.claude` file (fallback)
+
+If `gcloud` isn't available or the secret can't be accessed, the installer falls back to `~/.env.claude`. This is useful for local development outside of Coder.
 
 ```bash
 cp env.claude.example ~/.env.claude
+vim ~/.env.claude    # Fill in your keys
+bash ~/dotfiles/install.sh   # Re-run to apply
 ```
 
-Then fill in the values:
+### Required variables
 
 | Variable | Where to get it |
 |----------|----------------|
@@ -148,11 +170,7 @@ Then fill in the values:
 | `STATSIG_API_KEY` | Statsig console (project-level, used in found/ repo) |
 | `BIGQUERY_PROJECT` | GCP project ID (defaults to `bustling-syntax-229500`) |
 
-After editing, re-run the installer to apply:
-
-```bash
-bash ~/dotfiles/install.sh
-```
+See `env.claude.example` for the full template.
 
 ## Hooks
 
