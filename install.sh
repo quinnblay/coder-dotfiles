@@ -110,13 +110,16 @@ echo "[5/6] Configuring MCP servers..."
 # Retry a few times — workload identity credentials may not be ready at boot
 _gcp_secrets_loaded=false
 if command -v gcloud &>/dev/null; then
-  for _attempt in 1 2 3 4 5; do
-    if gcloud secrets versions access latest --secret=coder_quinn_secrets --project=found-dev-335120 > /tmp/.env.claude 2>/dev/null; then
+  echo "  gcloud identity: $(gcloud auth list --filter=status:ACTIVE --format='value(account)' 2>&1)"
+  echo "  Running as user: $(whoami)"
+  for _attempt in 1 2 3 4 5 6 7 8 9 10; do
+    _gcp_err=$(gcloud secrets versions access latest --secret=coder_quinn_secrets --project=found-dev-335120 2>&1 > /tmp/.env.claude)
+    if [ $? -eq 0 ]; then
       _gcp_secrets_loaded=true
       break
     fi
-    echo "  Waiting for GCP credentials (attempt $_attempt/5)..."
-    sleep 3
+    echo "  Attempt $_attempt/10 failed: $_gcp_err"
+    sleep 5
   done
 fi
 
