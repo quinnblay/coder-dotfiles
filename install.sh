@@ -107,7 +107,20 @@ echo "  Symlinked CLAUDE.md, settings.json, and hooks"
 echo "[5/6] Configuring MCP servers..."
 
 # Load secrets: prefer GCP Secret Manager, fall back to local file
-if command -v gcloud &>/dev/null && gcloud secrets versions access latest --secret=coder_quinn_secrets --project=found-dev-335120 > /tmp/.env.claude 2>/dev/null; then
+# Retry a few times — workload identity credentials may not be ready at boot
+_gcp_secrets_loaded=false
+if command -v gcloud &>/dev/null; then
+  for _attempt in 1 2 3 4 5; do
+    if gcloud secrets versions access latest --secret=coder_quinn_secrets --project=found-dev-335120 > /tmp/.env.claude 2>/dev/null; then
+      _gcp_secrets_loaded=true
+      break
+    fi
+    echo "  Waiting for GCP credentials (attempt $_attempt/5)..."
+    sleep 3
+  done
+fi
+
+if [ "$_gcp_secrets_loaded" = true ]; then
   echo "  Loading secrets from GCP Secret Manager (coder_quinn_secrets)..."
   set -a
   source /tmp/.env.claude
